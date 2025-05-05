@@ -1,5 +1,10 @@
 package types
 
+import (
+    "errors"
+    "math/rand"
+)
+
 type Handler struct {
     Player1   Player
     Player2   Player
@@ -21,19 +26,57 @@ type Player struct {
 }
 
 type Group struct {
-    Cards  []Card
-    Length int
+    Cards    []Card
+    Length   int
+    Type     string
+    Location string
 }
 
 type Card struct {
-    Name   string
-    Type   string
-    Effect func(*Handler) error
-    Turns  int
+    Name          string
+    Type          string
+    GroupType     string
+    GroupLocation string
+    Effect        func(*Handler) error
+    TurnsLeft     int
+    HandlerObj    Handler
 }
 
-func (c Card) play (h *Handler) error {
-    err := c.effect(h)
+func (g *Group) shuffle() error {
+    if g.Type != "deck" {
+        return errors.New("wrong group type")
+    }
+    newOrder := []Card{}
+    l := g.Length
+    for i := 0; i < l; i++ {
+        deckIndex := rand.Intn(g.Length)
+        newOrder = append(newOrder, g.Cards[deckIndex])
+        g.Cards[deckIndex] = g.Cards[g.Length-1]
+        g.Cards = g.Cards[:g.Length-1]
+        g.Length--
+    }
+    g.Length = l
+    g.Cards = newOrder
+    return nil
+}
+
+func (g *Group) draw() error, Card {
+    if g.Length == 0 {
+        return errors.New("group is empty"), nil
+    }
+    drawnCard := g.Cards[g.Length-1]
+    g.Cards := g.Cards[:g.Length-1]
+    g.Length--
+    return nil, drawnCard
+}
+
+func (g *Group) newCard(c Card) {
+    g.Cards = append(g.Cards, c)
+    g.Length++
+}
+
+func (c *Card) play() error {
+    err := c.effect(c.HandlerObj)
     if err != nil {
         return err
     }
