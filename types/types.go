@@ -71,7 +71,7 @@ func (p *Player) discardCard(toDiscard int) error {
         return errors.New("number is too large")
     }
     p.Discard.NewCard(p.Hand.Cards[toDiscard])
-    err = p.Hand.rmCard(toDiscard)
+    err := p.Hand.rmCard(toDiscard)
     if err != nil {
         return err
     }
@@ -83,7 +83,7 @@ func (p *Player) play(toPlay int) error {
         return errors.New("number is too large")
     }
     p.Hand.Cards[toPlay].play()
-    err = p.discardCard(toPlay)
+    err := p.discardCard(toPlay)
     if err != nil {
         return err
     }
