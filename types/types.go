@@ -7,20 +7,20 @@ import (
 )
 
 type Handler struct {
-    Player1   Player
-    Player2   Player
+    Player1   *Player
+    Player2   *Player
     Turns     int
     HandSize  int
-    VoidArea  Group
-    Infection Group
+    VoidArea  *Group
+    Infection *Group
 }
 
 type Player struct {
-    Hand        Group
-    Deck        Group
-    Discard     Group
-    Charms      Group
-    NailBoost   Group
+    Hand        *Group
+    Deck        *Group
+    Discard     *Group
+    Charms      *Group
+    NailBoost   *Group
     Health      int
     Soul        int
     Notches     int
@@ -53,44 +53,44 @@ type Card struct {
     HandlerObj    *Handler
 }
 
-func (p *Player) draw() error {
-    err, card := p.Deck.draw()
+func (p *Player) Draw() error {
+    err, card := p.Deck.Draw()
     if err != nil {
         return err
     }
-    p.Hand.newCard(card)
+    p.Hand.NewCard(card)
     return nil
 }
 
-func (p *Player) nailEquip(c Card) {
-    p.NailBoost.newCard(c)
+func (p *Player) NailEquip(c Card) {
+    p.NailBoost.NewCard(c)
 }
 
-func (p *Player) discardCard(toDiscard int) error {
+func (p *Player) DiscardCard(toDiscard int) error {
     if toDiscard >= p.Hand.Length {
         return errors.New("number is too large")
     }
     p.Discard.NewCard(p.Hand.Cards[toDiscard])
-    err := p.Hand.rmCard(toDiscard)
+    err := p.Hand.RmCard(toDiscard)
     if err != nil {
         return err
     }
     return nil
 }
 
-func (p *Player) play(toPlay int) error {
+func (p *Player) Play(toPlay int) error {
     if toPlay >= p.Hand.Length {
         return errors.New("number is too large")
     }
-    p.Hand.Cards[toPlay].play()
-    err := p.discardCard(toPlay)
+    p.Hand.Cards[toPlay].Play()
+    err := p.DiscardCard(toPlay)
     if err != nil {
         return err
     }
     return nil
 }
 
-func (g *Group) shuffle() error {
+func (g *Group) Shuffle() error {
     if g.Type != "deck" {
         return errors.New("wrong group type")
     }
@@ -108,17 +108,17 @@ func (g *Group) shuffle() error {
     return nil
 }
 
-func (g *Group) draw() error, Card {
+func (g *Group) Draw() (error, Card) {
     if g.Length == 0 {
-        return errors.New("group is empty"), nil
+        return errors.New("group is empty"), *new(Card)
     }
     drawnCard := g.Cards[g.Length-1]
-    g.Cards := g.Cards[:g.Length-1]
+    g.Cards = g.Cards[:g.Length-1]
     g.Length--
     return nil, drawnCard
 }
 
-func (g *Group) rmCard(i int) error {
+func (g *Group) RmCard(i int) error {
     if i >= g.Length {
         return errors.New("number is too large")
     }
@@ -127,19 +127,21 @@ func (g *Group) rmCard(i int) error {
     return nil
 }
 
-func (g *Group) newCard(c Card) {
+func (g *Group) NewCard(c Card) {
+    c.GroupType = g.Type
+    c.GroupLocation = g.Location
     g.Cards = append(g.Cards, c)
     g.Length++
 }
 
-func (c *Card) play() error {
+func (c *Card) Play() error {
     if c.Type == "nailS" {
         if c.GroupLocation == "Player1" {
-            c.Damage += c.HandlerObj.Player1.NailBoost[c.HandlerObj.Player1.NailBoost.Length-1].NailPlus
-            for _, charm := range c.HandlerObj.Player1.Charms {
+            c.Damage += c.HandlerObj.Player1.NailBoost.Cards[c.HandlerObj.Player1.NailBoost.Length-1].NailPlus
+            for _, charm := range c.HandlerObj.Player1.Charms.Cards {
                 charm.Effect(c, c.HandlerObj)
             }
-            for _, charm := range c.HandlerObj.Player2.Charms {
+            for _, charm := range c.HandlerObj.Player2.Charms.Cards {
                 charm.Effect(c, c.HandlerObj)
             }
             if c.HandlerObj.Player1.WeakPointS {
@@ -150,8 +152,7 @@ func (c *Card) play() error {
                 if r == 0 {
                     c.Damage = 0
                     c.Soul = 0
-                }
-                else if r == 1 || r == 2 {
+                } else if r == 1 || r == 2 {
                     c.Damage = c.Damage/2
                 }
             }
@@ -161,6 +162,7 @@ func (c *Card) play() error {
                     c.Damage = 0
                     c.Soul = 0
                 }
+            }
             if rand.Float32() >= c.FailChance {
                 c.HandlerObj.Player2.Health -= c.Damage
                 c.HandlerObj.Player1.Soul += c.Soul
@@ -169,11 +171,11 @@ func (c *Card) play() error {
             c.HandlerObj.Player2.WeakPointP = false
         }
         if c.GroupLocation == "Player2" {
-            c.Damage += c.HandlerObj.Player2.NailBoost[c.HandlerObj.Player2.NailBoost.Length-1]
-            for _, charm := range c.HandlerObj.Player2.Charms {
+            c.Damage += c.HandlerObj.Player2.NailBoost.Cards[c.HandlerObj.Player2.NailBoost.Length-1].NailPlus
+            for _, charm := range c.HandlerObj.Player2.Charms.Cards {
                 charm.Effect(c, c.HandlerObj)
             }
-            for _, charm := range c.HandlerObj.Player1.Charms {
+            for _, charm := range c.HandlerObj.Player1.Charms.Cards {
                 charm.Effect(c, c.HandlerObj)
             }
             if c.HandlerObj.Player2.WeakPointS {
@@ -184,8 +186,7 @@ func (c *Card) play() error {
                 if r == 0 {
                     c.Damage = 0
                     c.Soul = 0
-                }
-                else if r == 1 || r == 2 {
+                } else if r == 1 || r == 2 {
                     c.Damage = c.Damage/2
                 }
             }
@@ -195,6 +196,7 @@ func (c *Card) play() error {
                     c.Damage = 0
                     c.Soul = 0
                 }
+            }
             if rand.Float32() >= c.FailChance {
                 c.HandlerObj.Player1.Health -= c.Damage
                 c.HandlerObj.Player2.Soul += c.Soul
@@ -202,17 +204,16 @@ func (c *Card) play() error {
             c.HandlerObj.Player2.WeakPointS = false
             c.HandlerObj.Player1.WeakPointP = false
         }
-    }
-    else if c.Type == "nailA" {
+    } else if c.Type == "nailA" {
         if c.GroupLocation == "Player1" {
-            c.Damage += c.HandlerObj.Player1.NailBoost[c.HandlerObj.Player1.NailBoost.Length-1]
+            c.Damage += c.HandlerObj.Player1.NailBoost.Cards[c.HandlerObj.Player1.NailBoost.Length-1].NailPlus
             if c.HandlerObj.Player1.ArtUses == 1 {
                 c.Damage -= 3
             }
-            for _, charm := range c.HandlerObj.Player1.Charms {
+            for _, charm := range c.HandlerObj.Player1.Charms.Cards {
                 charm.Effect(c, c.HandlerObj)
             }
-            for _, charm := range c.HandlerObj.Player2.Charms {
+            for _, charm := range c.HandlerObj.Player2.Charms.Cards {
                 charm.Effect(c, c.HandlerObj)
             }
             if c.HandlerObj.Player1.WeakPointS {
@@ -223,8 +224,7 @@ func (c *Card) play() error {
                 if r == 0 {
                     c.Damage = 0
                     c.Soul = 0
-                }
-                else if r == 1 || r == 2 {
+                } else if r == 1 || r == 2 {
                     c.Damage = c.Damage/2
                 }
             }
@@ -234,6 +234,7 @@ func (c *Card) play() error {
                     c.Damage = 0
                     c.Soul = 0
                 }
+            }
             if rand.Float32() >= c.FailChance {
                 c.HandlerObj.Player2.Health -= c.Damage
                 c.HandlerObj.Player1.Soul += c.Soul
@@ -243,14 +244,14 @@ func (c *Card) play() error {
             c.HandlerObj.Player2.WeakPointP = false
         }
         if c.GroupLocation == "Player2" {
-            c.Damage += c.HandlerObj.Player2.NailBoost[c.HandlerObj.Player2.NailBoost.Length-1]
+            c.Damage += c.HandlerObj.Player2.NailBoost.Cards[c.HandlerObj.Player2.NailBoost.Length-1].NailPlus
             if c.HandlerObj.Player1.ArtUses == 1 {
                 c.Damage -= 3
             }
-            for _, charm := range c.HandlerObj.Player2.Charms {
+            for _, charm := range c.HandlerObj.Player2.Charms.Cards {
                 charm.Effect(c, c.HandlerObj)
             }
-            for _, charm := range c.HandlerObj.Player1.Charms {
+            for _, charm := range c.HandlerObj.Player1.Charms.Cards {
                 charm.Effect(c, c.HandlerObj)
             }
             if c.HandlerObj.Player2.WeakPointS {
@@ -261,8 +262,7 @@ func (c *Card) play() error {
                 if r == 0 {
                     c.Damage = 0
                     c.Soul = 0
-                }
-                else if r == 1 || r == 2 {
+                } else if r == 1 || r == 2 {
                     c.Damage = c.Damage/2
                 }
             }
@@ -272,6 +272,7 @@ func (c *Card) play() error {
                     c.Damage = 0
                     c.Soul = 0
                 }
+            }
             if rand.Float32() >= c.FailChance {
                 c.HandlerObj.Player1.Health -= c.Damage
                 c.HandlerObj.Player2.Soul += c.Soul
@@ -280,14 +281,12 @@ func (c *Card) play() error {
             c.HandlerObj.Player2.WeakPointS = false
             c.HandlerObj.Player1.WeakPointP = false
         }
-    }
-    else if c.Type == "spell" {
+    } else if c.Type == "spell" {
         if c.GroupLocation == "Player1" {
-            c.Damage += c.HandlerObj.Player1.NailBoost[c.HandlerObj.Player1.NailBoost.Length-1]
-            for _, charm := range c.HandlerObj.Player1.Charms {
+            for _, charm := range c.HandlerObj.Player1.Charms.Cards {
                 charm.Effect(c, c.HandlerObj)
             }
-            for _, charm := range c.HandlerObj.Player2.Charms {
+            for _, charm := range c.HandlerObj.Player2.Charms.Cards {
                 charm.Effect(c, c.HandlerObj)
             }
             if c.HandlerObj.Player1.WeakPointS {
@@ -297,8 +296,7 @@ func (c *Card) play() error {
                 r := rand.Intn(3)
                 if r == 0 {
                     c.Damage = 0
-                }
-                else if r == 1 || r == 2 {
+                } else if r == 1 || r == 2 {
                     c.Damage = c.Damage/2
                 }
             }
@@ -307,6 +305,7 @@ func (c *Card) play() error {
                 if r == 0 {
                     c.Damage = 0
                 }
+            }
             if rand.Float32() >= c.FailChance {
                 c.HandlerObj.Player2.Health -= c.Damage
             }
@@ -315,10 +314,10 @@ func (c *Card) play() error {
             c.HandlerObj.Player2.WeakPointP = false
         }
         if c.GroupLocation == "Player2" {
-            for _, charm := range c.HandlerObj.Player2.Charms {
+            for _, charm := range c.HandlerObj.Player2.Charms.Cards {
                 charm.Effect(c, c.HandlerObj)
             }
-            for _, charm := range c.HandlerObj.Player1.Charms {
+            for _, charm := range c.HandlerObj.Player1.Charms.Cards {
                 charm.Effect(c, c.HandlerObj)
             }
             if c.HandlerObj.Player2.WeakPointS {
@@ -328,8 +327,7 @@ func (c *Card) play() error {
                 r := rand.Intn(3)
                 if r == 0 {
                     c.Damage = 0
-                }
-                else if r == 1 || r == 2 {
+                } else if r == 1 || r == 2 {
                     c.Damage = c.Damage/2
                 }
             }
@@ -338,6 +336,7 @@ func (c *Card) play() error {
                 if r == 0 {
                     c.Damage = 0
                 }
+            }
             if rand.Float32() >= c.FailChance {
                 c.HandlerObj.Player1.Health -= c.Damage
             }
@@ -345,19 +344,16 @@ func (c *Card) play() error {
             c.HandlerObj.Player2.WeakPointS = false
             c.HandlerObj.Player1.WeakPointP = false
         }
-    }
-    else if c.Type == "precept" {
+    } else if c.Type == "precept" {
         c.Effect(c, c.HandlerObj)
-    }
-    else if c.Type == "nailT" {
+    } else if c.Type == "nailT" {
         if c.GroupLocation == "Player1" {
-            c.HandlerObj.Player1.nailEquip(c)
+            c.HandlerObj.Player1.NailEquip(*c)
         }
         if c.GroupLocation == "Player2" {
-            c.HandlerObj.Player2.nailEquip(c)
+            c.HandlerObj.Player2.NailEquip(*c)
         }
-    }
-    else {
+    } else {
         return errors.New("wrong card type")
     }
     return nil
