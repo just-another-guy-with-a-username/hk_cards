@@ -5,7 +5,7 @@ import (
     "fyne.io/fyne/v2/app"
     "fyne.io/fyne/v2/widget"
     "fyne.io/fyne/v2/container"
-    "fyne.io/fyne/v2/canvas"
+//    "fyne.io/fyne/v2/canvas"
     "fyne.io/fyne/v2/layout"
     "hk_cards/types"
     "hk_cards/cards"
@@ -25,41 +25,18 @@ func initDeck(i int, p int, h *types.Handler) *types.Group {
     if p == 2 {
         deck.Location = "Player2"
     }
-    for n := 0; n < 53; n++ {
+    for n := 0; n < 50; n++ {
         c := new(types.Card)
         c.Name = fmt.Sprintf("%d", n+1)
         deck.NewCard(*c)
     }
     deck.NewCard(cards.NewNailSlash(h))
-    c := new(types.Card)
-    c.Name = "shaman stone"
-    c.Type = "charm"
-    c.HandlerObj = h
-    c.GroupType = "deck"
-    c.GroupLocation = deck.Location
-    c.Effect = cards.ShamanStone
-    c.NotchCost = 3
-    deck.NewCard(*c)
-    c = new(types.Card)
-    c.Name = "vengeful spirit"
-    c.Type = "spell"
-    c.HandlerObj = h
-    c.FailChance = 0
-    c.GroupType = "deck"
-    c.GroupLocation = deck.Location
-    c.Damage = 10
-    c.Soul = 2
-    deck.NewCard(*c)
-    c = new(types.Card)
-    c.Name = "vengeful spirit"
-    c.Type = "spell"
-    c.HandlerObj = h
-    c.FailChance = 0
-    c.GroupType = "deck"
-    c.GroupLocation = deck.Location
-    c.Damage = 10
-    c.Soul = 2
-    deck.NewCard(*c)
+    deck.NewCard(cards.NewDreamNail(h))
+    deck.NewCard(cards.NewDoNotDream(h))
+    deck.NewCard(cards.NewDreamNail(h))
+    deck.NewCard(cards.NewNailSlash(h))
+    deck.NewCard(cards.NewNailSlash(h))
+    deck.NewCard(cards.NewNailSlash(h))
     return deck
 }
 
