@@ -1,11 +1,18 @@
 package main
 
 import (
+    "fyne.io/fyne/v2"
     "fyne.io/fyne/v2/app"
     "fyne.io/fyne/v2/widget"
+    "fyne.io/fyne/v2/container"
+    "fyne.io/fyne/v2/canvas"
+    "fyne.io/fyne/v2/layout"
     "hk_cards/types"
     "hk_cards/cards"
     "fmt"
+//    "time"
+//    "math"
+//    "slices"
 )
 
 func initDeck(i int, p int, h *types.Handler) *types.Group {
@@ -18,11 +25,12 @@ func initDeck(i int, p int, h *types.Handler) *types.Group {
     if p == 2 {
         deck.Location = "Player2"
     }
-    for n := 0; n < 54; n++ {
+    for n := 0; n < 53; n++ {
         c := new(types.Card)
         c.Name = fmt.Sprintf("%d", n+1)
         deck.NewCard(*c)
     }
+    deck.NewCard(cards.NewNailSlash(h))
     c := new(types.Card)
     c.Name = "shaman stone"
     c.Type = "charm"
@@ -120,33 +128,60 @@ func initGame(i1 int, i2 int) types.Handler {
     return *game
 }
 
+func displayCards(w fyne.Window, p int, h *types.Handler) {
+    if p == 1 {
+        cardsPresent := container.New(layout.NewHBoxLayout())
+        centeredCards := container.NewCenter(cardsPresent)
+        for i, card := range(h.Player1.Hand.Cards) {
+            cardsPresent.Add(widget.NewButton(card.Name, func() {PlayCardHandling(p, i, h, centeredCards, w)}))
+        }
+        w.SetContent(centeredCards)
+    } else if p == 2 {
+        cardsPresent := container.New(layout.NewHBoxLayout())
+        centeredCards := container.NewCenter(cardsPresent)
+        for i, card := range(h.Player2.Hand.Cards) {
+            cardsPresent.Add(widget.NewButton(card.Name, func() {PlayCardHandling(p, i, h, centeredCards, w)}))
+        }
+        w.SetContent(centeredCards)
+    }
+}
+
+func PlayCardHandling(p int, i int, h *types.Handler, c *fyne.Container, w fyne.Window) {
+    if p == 1 {
+        h.Player1.Play(i, w)
+        p = 2
+    } else if p == 2 {
+        h.Player2.Play(i, w)
+        p = 1
+    }
+    c.RemoveAll()
+    status := Turn(w, p, h)
+    if status == 0 {
+    }
+}
+
+func Turn(w fyne.Window, p int, h *types.Handler) int {
+    if p == 1 {
+        h.Player1.DrawHand()
+    }
+    if p == 2 {
+        h.Player2.DrawHand()
+    }
+    displayCards(w, p, h)
+    if (h.Player2.Deck.Length == 0 && h.Player2.Hand.Length == 0) || h.Player2.Health <= 0 {
+        return 1
+    }
+    if (h.Player1.Deck.Length == 0 && h.Player1.Hand.Length == 0) || h.Player1.Health <= 0 {
+        return 2
+    }
+    return 0
+}
+
 func main() {
     game := initGame(1, 1)
-    fmt.Println("drawing three cards")
-    game.Player1.Draw()
-    game.Player1.Draw()
-    game.Player1.Draw()
-    game.Player2.Draw()
-    game.Player2.Draw()
-    game.Player2.Draw()
-    fmt.Println(game.Player2.Health)
-    fmt.Println(game.Player1.Soul)
-    err := game.Player1.Play(0)
-    if err != nil {
-        fmt.Println(err)
-    }
-    fmt.Println(game.Player2.Health)
-    fmt.Println(game.Player1.Soul)
-    game.Player1.CharmEquip(1)
-    game.Player2.CharmEquip(2)
-    err = game.Player1.Play(0)
-    if err != nil {
-        fmt.Println(err)
-    }
-    fmt.Println(game.Player2.Health)
-    fmt.Println(game.Player1.Soul)
     a := app.New()
-    w := a.NewWindow("Hello World")
-    w.SetContent(widget.NewLabel("Hello World!"))
+    w := a.NewWindow("Colosseum Of Fools")
+    startButton := container.NewCenter(container.New(layout.NewHBoxLayout(), widget.NewButton("Start Game", func() {Turn(w, 1, &game)})))
+    w.SetContent(startButton)
     w.ShowAndRun()
 }

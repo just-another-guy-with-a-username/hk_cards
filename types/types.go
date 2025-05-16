@@ -1,10 +1,14 @@
 package types
 
 import (
-    "fmt"
+    "fyne.io/fyne/v2"
+    "fyne.io/fyne/v2/container"
+    "fyne.io/fyne/v2/layout"
+    "fyne.io/fyne/v2/widget"
     "errors"
     "math/rand"
     "slices"
+    "time"
 )
 
 type Handler struct {
@@ -26,6 +30,7 @@ type Player struct {
     Soul        int
     Notches     int
     ArtUses     int
+    DodgeChance bool
     WeakPointS  bool
     WeakPointP  bool
     Overcharmed bool
@@ -51,6 +56,7 @@ type Card struct {
     EndDamage     int
     Soul          int
     FailChance    float32
+    AddsDodge     bool
     HandlerObj    *Handler
 }
 
@@ -60,6 +66,16 @@ func (p *Player) Draw() error {
         return err
     }
     p.Hand.NewCard(card)
+    return nil
+}
+
+func (p *Player) DrawHand() error {
+    for i := p.Hand.Length; i < 7; i++ {
+        err := p.Draw()
+        if err != nil {
+            return err
+        }
+    }
     return nil
 }
 
@@ -99,11 +115,11 @@ func (p *Player) DiscardCard(toDiscard int) error {
     return nil
 }
 
-func (p *Player) Play(toPlay int) error {
+func (p *Player) Play(toPlay int, w fyne.Window) error {
     if toPlay >= p.Hand.Length {
         return errors.New("number is too large")
     }
-    p.Hand.Cards[toPlay].Play()
+    p.Hand.Cards[toPlay].Play(w)
     err := p.DiscardCard(toPlay)
     if err != nil {
         return err
@@ -155,8 +171,7 @@ func (g *Group) NewCard(c Card) {
     g.Length++
 }
 
-func (c *Card) Play() error {
-    fmt.Println(c.Damage)
+func (c *Card) Play(w fyne.Window) error {
     if c.Type == "nailS" {
         if c.GroupLocation == "Player1" {
             c.Damage += c.HandlerObj.Player1.NailBoost.Cards[c.HandlerObj.Player1.NailBoost.Length-1].NailPlus
@@ -179,6 +194,13 @@ func (c *Card) Play() error {
                 }
             }
             if c.HandlerObj.Player2.WeakPointP && !c.HandlerObj.Player1.WeakPointS {
+                r := rand.Intn(1)
+                if r == 0 {
+                    c.Damage = 0
+                    c.Soul = 0
+                }
+            }
+            if c.HandlerObj.Player2.DodgeChance {
                 r := rand.Intn(1)
                 if r == 0 {
                     c.Damage = 0
@@ -213,6 +235,13 @@ func (c *Card) Play() error {
                 }
             }
             if c.HandlerObj.Player1.WeakPointP && !c.HandlerObj.Player2.WeakPointS {
+                r := rand.Intn(1)
+                if r == 0 {
+                    c.Damage = 0
+                    c.Soul = 0
+                }
+            }
+            if c.HandlerObj.Player1.DodgeChance {
                 r := rand.Intn(1)
                 if r == 0 {
                     c.Damage = 0
@@ -257,10 +286,21 @@ func (c *Card) Play() error {
                     c.Soul = 0
                 }
             }
+            if c.HandlerObj.Player2.DodgeChance {
+                r := rand.Intn(1)
+                if r == 0 {
+                    c.Damage = 0
+                    c.Soul = 0
+                }
+            }
             if rand.Float32() >= c.FailChance {
                 c.HandlerObj.Player2.Health -= c.Damage
                 c.HandlerObj.Player1.Soul += c.Soul
             }
+            if c.AddsDodge {
+                c.HandlerObj.Player1.DodgeChance = true
+            }
+            c.HandlerObj.Player2.DodgeChance = false
             c.HandlerObj.Player1.ArtUses++
             c.HandlerObj.Player1.WeakPointS = false
             c.HandlerObj.Player2.WeakPointP = false
@@ -295,10 +335,21 @@ func (c *Card) Play() error {
                     c.Soul = 0
                 }
             }
+            if c.HandlerObj.Player1.DodgeChance {
+                r := rand.Intn(1)
+                if r == 0 {
+                    c.Damage = 0
+                    c.Soul = 0
+                }
+            }
             if rand.Float32() >= c.FailChance {
                 c.HandlerObj.Player1.Health -= c.Damage
                 c.HandlerObj.Player2.Soul += c.Soul
             }
+            if c.AddsDodge {
+                c.HandlerObj.Player2.DodgeChance = true
+            }
+            c.HandlerObj.Player1.DodgeChance = false
             c.HandlerObj.Player2.ArtUses++
             c.HandlerObj.Player2.WeakPointS = false
             c.HandlerObj.Player1.WeakPointP = false
@@ -328,9 +379,20 @@ func (c *Card) Play() error {
                     c.Damage = 0
                 }
             }
+            if c.HandlerObj.Player2.DodgeChance {
+                r := rand.Intn(1)
+                if r == 0 {
+                    c.Damage = 0
+                    c.Soul = 0
+                }
+            }
             if rand.Float32() >= c.FailChance {
                 c.HandlerObj.Player2.Health -= c.Damage
             }
+            if c.AddsDodge {
+                c.HandlerObj.Player1.DodgeChance = true
+            }
+            c.HandlerObj.Player2.DodgeChance = false
             c.HandlerObj.Player1.Soul -= c.Soul
             c.HandlerObj.Player1.WeakPointS = false
             c.HandlerObj.Player2.WeakPointP = false
@@ -359,9 +421,20 @@ func (c *Card) Play() error {
                     c.Damage = 0
                 }
             }
+            if c.HandlerObj.Player1.DodgeChance {
+                r := rand.Intn(1)
+                if r == 0 {
+                    c.Damage = 0
+                    c.Soul = 0
+                }
+            }
             if rand.Float32() >= c.FailChance {
                 c.HandlerObj.Player1.Health -= c.Damage
             }
+            if c.AddsDodge {
+                c.HandlerObj.Player2.DodgeChance = true
+            }
+            c.HandlerObj.Player1.DodgeChance = false
             c.HandlerObj.Player2.Soul -= c.Soul
             c.HandlerObj.Player2.WeakPointS = false
             c.HandlerObj.Player1.WeakPointP = false
@@ -376,7 +449,28 @@ func (c *Card) Play() error {
             c.HandlerObj.Player2.NailEquip(*c)
         }
     } else if c.Type == "nailD" {
-        return nil
+        if c.GroupLocation == "Player1" {
+            cardsSlice := []fyne.CanvasObject{}
+            for _, card := range(c.HandlerObj.Player2.Hand.Cards) {
+                cardsSlice = append(cardsSlice, widget.NewLabel(card.Name))
+            }
+            cardsPresent := container.NewCenter(container.New(layout.NewHBoxLayout(), cardsSlice...))
+            w.SetContent(cardsPresent)
+            time.Sleep(time.Second * 2)
+            cardsPresent.RemoveAll()
+            cardsPresent.Refresh()
+        }
+        if c.GroupLocation == "Player2" {
+            cardsSlice := []fyne.CanvasObject{}
+            for _, card := range(c.HandlerObj.Player1.Hand.Cards) {
+                cardsSlice = append(cardsSlice, widget.NewLabel(card.Name))
+            }
+            cardsPresent := container.NewCenter(container.New(layout.NewHBoxLayout(), cardsSlice...))
+            w.SetContent(cardsPresent)
+            time.Sleep(time.Second * 2)
+            cardsPresent.RemoveAll()
+            cardsPresent.Refresh()
+        }
     } else {
         return errors.New("wrong card type")
     }
