@@ -485,6 +485,13 @@ func (c *Card) Play(w fyne.Window) error {
         }
     } else if c.Type == "nailD" {
         if c.GroupLocation == "Player1" {
+            for _, charm := range c.HandlerObj.Player1.Charms.Cards {
+                charm.Effect(c, &charm, c.HandlerObj, w)
+            }
+            for _, charm := range c.HandlerObj.Player2.Charms.Cards {
+                charm.Effect(c, &charm, c.HandlerObj, w)
+            }
+            c.HandlerObj.Player1.Soul += c.Soul
             cardsSlice := []fyne.CanvasObject{}
             for _, card := range(c.HandlerObj.Player2.Hand.Cards) {
                 cardsSlice = append(cardsSlice, widget.NewLabel(card.Name))
@@ -496,6 +503,13 @@ func (c *Card) Play(w fyne.Window) error {
             cardsPresent.Refresh()
         }
         if c.GroupLocation == "Player2" {
+            for _, charm := range c.HandlerObj.Player2.Charms.Cards {
+                charm.Effect(c, &charm, c.HandlerObj, w)
+            }
+            for _, charm := range c.HandlerObj.Player1.Charms.Cards {
+                charm.Effect(c, &charm, c.HandlerObj, w)
+            }
+            c.HandlerObj.Player2.Soul += c.Soul
             cardsSlice := []fyne.CanvasObject{}
             for _, card := range(c.HandlerObj.Player1.Hand.Cards) {
                 cardsSlice = append(cardsSlice, widget.NewLabel(card.Name))

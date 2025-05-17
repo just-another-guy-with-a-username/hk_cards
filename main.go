@@ -160,5 +160,7 @@ func main() {
     w := a.NewWindow("Colosseum Of Fools")
     startButton := container.NewCenter(container.New(layout.NewHBoxLayout(), widget.NewButton("Start Game", func() {Turn(w, 1, &game)})))
     w.SetContent(startButton)
+    w.SetFullScreen(true)
+    w.SetFixedSize(true)
     w.ShowAndRun()
 }

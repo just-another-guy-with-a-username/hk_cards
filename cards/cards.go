@@ -144,6 +144,7 @@ func NewDreamNail(h *types.Handler) types.Card {
     c.Type = "nailD"
     c.Name = "Dream Nail"
     c.ImagePath = "images/dream_nail.png"
+    c.Soul = 2
     c.HandlerObj = h
     return *c
 }
@@ -247,7 +248,7 @@ func DoNotDream(c *types.Card, ch *types.Card, h *types.Handler, w fyne.Window) 
             h.Player1.DiscardCard(i)
         }
     }
-    for i, card := range(h.Player2.Hand.Cards) {
+    for i, card := range(slices.Backward(h.Player2.Hand.Cards)) {
         if card.Type == "nailD" {
             h.Player2.DiscardCard(i)
         }
