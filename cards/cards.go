@@ -223,7 +223,7 @@ func NewVoidCovering(h *types.Handler) types.Card {
     return *c
 }
 
-func ShamanStone(c *types.Card, ch *types.Card, h *types.Handler, w fyne.Window) error {
+func ShamanStone(c *types.Card, ch *types.Card, h *types.Handler, main *fyne.Container) error {
     if c.Type == "spell" {
         if c.GroupLocation == ch.GroupLocation {
             c.Damage = int(math.Floor(float64(c.Damage) * float64(1.5)))
@@ -242,7 +242,7 @@ func NewShamanStone(h *types.Handler) types.Card {
     return *c
 }
 
-func DoNotDream(c *types.Card, ch *types.Card, h *types.Handler, w fyne.Window) error {
+func DoNotDream(c *types.Card, ch *types.Card, h *types.Handler, main *fyne.Container) error {
     for i, card := range(slices.Backward(h.Player1.Hand.Cards)) {
         if card.Type == "nailD" {
             h.Player1.DiscardCard(i)
@@ -266,7 +266,7 @@ func NewDoNotDream(h *types.Handler) types.Card {
     return *c
 }
 
-func StrikeTheFoesWeakPoint(c *types.Card, ch *types.Card, h *types.Handler, w fyne.Window) error {
+func StrikeTheFoesWeakPoint(c *types.Card, ch *types.Card, h *types.Handler, main *fyne.Container) error {
     if ch.GroupLocation == "Player1" {
         h.Player1.WeakPointS = true
     }
@@ -286,7 +286,7 @@ func NewStrikeTheFoesWeakPoint(h *types.Handler) types.Card {
     return *c
 }
 
-func ProtectYourOwnWeakPoint(c *types.Card, ch *types.Card, h *types.Handler, w fyne.Window) error {
+func ProtectYourOwnWeakPoint(c *types.Card, ch *types.Card, h *types.Handler, main *fyne.Container) error {
     if ch.GroupLocation == "Player1" {
         h.Player1.WeakPointP = true
     }
@@ -306,7 +306,7 @@ func NewProtectYourOwnWeakPoint(h *types.Handler) types.Card {
     return *c
 }
 
-func EatAsMuchAsYouCan(c *types.Card, ch *types.Card, h *types.Handler, w fyne.Window) error {
+func EatAsMuchAsYouCan(c *types.Card, ch *types.Card, h *types.Handler, main *fyne.Container) error {
     if ch.GroupLocation == "Player1" {
         h.Player1.Health += 10
         h.Player2.Health += 5

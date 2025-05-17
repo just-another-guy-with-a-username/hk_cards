@@ -9,6 +9,7 @@ import (
     "fyne.io/fyne/v2/layout"
     "hk_cards/types"
     "hk_cards/cards"
+    "github.com/fstanis/screenresolution"
     "fmt"
 //    "time"
 //    "math"
@@ -105,46 +106,52 @@ func initGame(i1 int, i2 int) types.Handler {
     return *game
 }
 
-func displayCards(w fyne.Window, p int, h *types.Handler) {
+func displayCards(main *fyne.Container, p int, h *types.Handler) {
     if p == 1 {
         cardsPresent := container.New(layout.NewHBoxLayout())
         centeredCards := container.NewCenter(cardsPresent)
         for i, card := range(h.Player1.Hand.Cards) {
-            cardsPresent.Add(widget.NewButton(card.Name, func() {PlayCardHandling(p, i, h, centeredCards, w)}))
+            cardsPresent.Add(widget.NewButton(card.Name, func() {PlayCardHandling(p, i, h, centeredCards, main)}))
         }
-        w.SetContent(centeredCards)
+        main.Add(centeredCards)
     } else if p == 2 {
         cardsPresent := container.New(layout.NewHBoxLayout())
         centeredCards := container.NewCenter(cardsPresent)
         for i, card := range(h.Player2.Hand.Cards) {
-            cardsPresent.Add(widget.NewButton(card.Name, func() {PlayCardHandling(p, i, h, centeredCards, w)}))
+            cardsPresent.Add(widget.NewButton(card.Name, func() {PlayCardHandling(p, i, h, centeredCards, main)}))
         }
-        w.SetContent(centeredCards)
+        main.Add(centeredCards)
     }
 }
 
-func PlayCardHandling(p int, i int, h *types.Handler, c *fyne.Container, w fyne.Window) {
+func PlayCardHandling(p int, i int, h *types.Handler, c *fyne.Container, main *fyne.Container) {
     if p == 1 {
-        h.Player1.Play(i, w)
+        h.Player1.Play(i, main)
         p = 2
     } else if p == 2 {
-        h.Player2.Play(i, w)
+        h.Player2.Play(i, main)
         p = 1
     }
     c.RemoveAll()
-    status := Turn(w, p, h)
+    status := Turn(main, p, h)
     if status == 0 {
     }
 }
 
-func Turn(w fyne.Window, p int, h *types.Handler) int {
+func StartGame(main *fyne.Container, p int, h *types.Handler, start *widget.Button) {
+    main.Remove(start)
+    main.Refresh()
+    Turn(main, p, h)
+}
+
+func Turn(main *fyne.Container, p int, h *types.Handler) int {
     if p == 1 {
         h.Player1.DrawHand()
     }
     if p == 2 {
         h.Player2.DrawHand()
     }
-    displayCards(w, p, h)
+    displayCards(main, p, h)
     if (h.Player2.Deck.Length == 0 && h.Player2.Hand.Length == 0) || h.Player2.Health <= 0 {
         return 1
     }
@@ -154,13 +161,28 @@ func Turn(w fyne.Window, p int, h *types.Handler) int {
     return 0
 }
 
+func WinClose(w fyne.Window) {
+    w.Close()
+}
+
 func main() {
+    w_height := screenresolution.GetPrimary().Height
+    w_width := screenresolution.GetPrimary().Width
     game := initGame(1, 1)
     a := app.New()
     w := a.NewWindow("Colosseum Of Fools")
-    startButton := container.NewCenter(container.New(layout.NewHBoxLayout(), widget.NewButton("Start Game", func() {Turn(w, 1, &game)})))
-    w.SetContent(startButton)
+    AllContent := container.NewWithoutLayout()
     w.SetFullScreen(true)
     w.SetFixedSize(true)
+    StartButton := widget.NewButton("Start Game", func() {a = a})
+    StartButton.OnTapped = func() {StartGame(AllContent, 1, &game, StartButton)}
+    StartButton.Resize(fyne.NewSize(150, 50))
+    StartButton.Move(fyne.NewPos(float32(w_width/2), float32(w_height/2)))
+    CloseButton := widget.NewButton("Close", func() {WinClose(w)})
+    CloseButton.Resize(fyne.NewSize(150, 50))
+    CloseButton.Move(fyne.NewPos(300, 100))
+    AllContent.Add(StartButton)
+    AllContent.Add(CloseButton)
+    w.SetContent(AllContent)
     w.ShowAndRun()
 }

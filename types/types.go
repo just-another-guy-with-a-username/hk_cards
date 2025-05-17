@@ -50,7 +50,7 @@ type Card struct {
     Type          string
     GroupType     string
     GroupLocation string
-    Effect        func(*Card, *Card, *Handler, fyne.Window) error
+    Effect        func(*Card, *Card, *Handler, *fyne.Container) error
     NotchCost     int
     TurnsLeft     int
     NailPlus      int
@@ -117,7 +117,7 @@ func (p *Player) DiscardCard(toDiscard int) error {
     return nil
 }
 
-func (p *Player) Play(toPlay int, w fyne.Window) error {
+func (p *Player) Play(toPlay int, main *fyne.Container) error {
     if toPlay >= p.Hand.Length {
         return errors.New("number is too large")
     }
@@ -126,7 +126,7 @@ func (p *Player) Play(toPlay int, w fyne.Window) error {
         if err != nil {
             return err
         }
-        err = c.Play(w)
+        err = c.Play(main)
         if err != nil {
             slices.Insert(p.Hand.Cards, toPlay, c)
             p.Hand.Length++
@@ -135,7 +135,7 @@ func (p *Player) Play(toPlay int, w fyne.Window) error {
         p.Discard.NewCard(c)
         return nil
     } else {
-        err := p.Hand.Cards[toPlay].Play(w)
+        err := p.Hand.Cards[toPlay].Play(main)
         if err != nil {
             return err
         }
@@ -198,17 +198,17 @@ func (g *Group) NewCard(c Card) {
     g.Length++
 }
 
-func (c *Card) Play(w fyne.Window) error {
+func (c *Card) Play(main *fyne.Container) error {
     if c.Type == "nailS" {
         if c.GroupLocation == "Player1" {
             if c.HandlerObj.Player1.NailBoost != nil {
                 c.Damage += c.HandlerObj.Player1.NailBoost.Cards[c.HandlerObj.Player1.NailBoost.Length-1].NailPlus
             }
             for _, charm := range c.HandlerObj.Player1.Charms.Cards {
-                charm.Effect(c, &charm, c.HandlerObj, w)
+                charm.Effect(c, &charm, c.HandlerObj, main)
             }
             for _, charm := range c.HandlerObj.Player2.Charms.Cards {
-                charm.Effect(c, &charm, c.HandlerObj, w)
+                charm.Effect(c, &charm, c.HandlerObj, main)
             }
             if c.HandlerObj.Player1.WeakPointS {
                 c.Damage = c.Damage * 2
@@ -248,10 +248,10 @@ func (c *Card) Play(w fyne.Window) error {
                 c.Damage += c.HandlerObj.Player2.NailBoost.Cards[c.HandlerObj.Player2.NailBoost.Length-1].NailPlus
             }
             for _, charm := range c.HandlerObj.Player2.Charms.Cards {
-                charm.Effect(c, &charm, c.HandlerObj, w)
+                charm.Effect(c, &charm, c.HandlerObj, main)
             }
             for _, charm := range c.HandlerObj.Player1.Charms.Cards {
-                charm.Effect(c, &charm, c.HandlerObj, w)
+                charm.Effect(c, &charm, c.HandlerObj, main)
             }
             if c.HandlerObj.Player2.WeakPointS {
                 c.Damage = c.Damage * 2
@@ -295,10 +295,10 @@ func (c *Card) Play(w fyne.Window) error {
                 c.Damage -= 3
             }
             for _, charm := range c.HandlerObj.Player1.Charms.Cards {
-                charm.Effect(c, &charm, c.HandlerObj, w)
+                charm.Effect(c, &charm, c.HandlerObj, main)
             }
             for _, charm := range c.HandlerObj.Player2.Charms.Cards {
-                charm.Effect(c, &charm, c.HandlerObj, w)
+                charm.Effect(c, &charm, c.HandlerObj, main)
             }
             if c.HandlerObj.Player1.WeakPointS {
                 c.Damage = c.Damage * 2
@@ -346,10 +346,10 @@ func (c *Card) Play(w fyne.Window) error {
                 c.Damage -= 3
             }
             for _, charm := range c.HandlerObj.Player2.Charms.Cards {
-                charm.Effect(c, &charm, c.HandlerObj, w)
+                charm.Effect(c, &charm, c.HandlerObj, main)
             }
             for _, charm := range c.HandlerObj.Player1.Charms.Cards {
-                charm.Effect(c, &charm, c.HandlerObj, w)
+                charm.Effect(c, &charm, c.HandlerObj, main)
             }
             if c.HandlerObj.Player2.WeakPointS {
                 c.Damage = c.Damage * 2
@@ -392,10 +392,10 @@ func (c *Card) Play(w fyne.Window) error {
     } else if c.Type == "spell" {
         if c.GroupLocation == "Player1" {
             for _, charm := range c.HandlerObj.Player1.Charms.Cards {
-                charm.Effect(c, &charm, c.HandlerObj, w)
+                charm.Effect(c, &charm, c.HandlerObj, main)
             }
             for _, charm := range c.HandlerObj.Player2.Charms.Cards {
-                charm.Effect(c, &charm, c.HandlerObj, w)
+                charm.Effect(c, &charm, c.HandlerObj, main)
             }
             if c.HandlerObj.Player1.WeakPointS {
                 c.Damage = c.Damage * 2
@@ -434,10 +434,10 @@ func (c *Card) Play(w fyne.Window) error {
         }
         if c.GroupLocation == "Player2" {
             for _, charm := range c.HandlerObj.Player2.Charms.Cards {
-                charm.Effect(c, &charm, c.HandlerObj, w)
+                charm.Effect(c, &charm, c.HandlerObj, main)
             }
             for _, charm := range c.HandlerObj.Player1.Charms.Cards {
-                charm.Effect(c, &charm, c.HandlerObj, w)
+                charm.Effect(c, &charm, c.HandlerObj, main)
             }
             if c.HandlerObj.Player2.WeakPointS {
                 c.Damage = c.Damage * 2
@@ -475,7 +475,7 @@ func (c *Card) Play(w fyne.Window) error {
             c.HandlerObj.Player1.WeakPointP = false
         }
     } else if c.Type == "precept" {
-        c.Effect(c, new(Card), c.HandlerObj, w)
+        c.Effect(c, new(Card), c.HandlerObj, main)
     } else if c.Type == "nailT" {
         if c.GroupLocation == "Player1" {
             c.HandlerObj.Player1.NailEquip(*c)
@@ -486,10 +486,10 @@ func (c *Card) Play(w fyne.Window) error {
     } else if c.Type == "nailD" {
         if c.GroupLocation == "Player1" {
             for _, charm := range c.HandlerObj.Player1.Charms.Cards {
-                charm.Effect(c, &charm, c.HandlerObj, w)
+                charm.Effect(c, &charm, c.HandlerObj, main)
             }
             for _, charm := range c.HandlerObj.Player2.Charms.Cards {
-                charm.Effect(c, &charm, c.HandlerObj, w)
+                charm.Effect(c, &charm, c.HandlerObj, main)
             }
             c.HandlerObj.Player1.Soul += c.Soul
             cardsSlice := []fyne.CanvasObject{}
@@ -497,17 +497,17 @@ func (c *Card) Play(w fyne.Window) error {
                 cardsSlice = append(cardsSlice, widget.NewLabel(card.Name))
             }
             cardsPresent := container.NewCenter(container.New(layout.NewHBoxLayout(), cardsSlice...))
-            w.SetContent(cardsPresent)
+            main.Add(cardsPresent)
             time.Sleep(time.Second * 2)
             cardsPresent.RemoveAll()
             cardsPresent.Refresh()
         }
         if c.GroupLocation == "Player2" {
             for _, charm := range c.HandlerObj.Player2.Charms.Cards {
-                charm.Effect(c, &charm, c.HandlerObj, w)
+                charm.Effect(c, &charm, c.HandlerObj, main)
             }
             for _, charm := range c.HandlerObj.Player1.Charms.Cards {
-                charm.Effect(c, &charm, c.HandlerObj, w)
+                charm.Effect(c, &charm, c.HandlerObj, main)
             }
             c.HandlerObj.Player2.Soul += c.Soul
             cardsSlice := []fyne.CanvasObject{}
@@ -515,7 +515,7 @@ func (c *Card) Play(w fyne.Window) error {
                 cardsSlice = append(cardsSlice, widget.NewLabel(card.Name))
             }
             cardsPresent := container.NewCenter(container.New(layout.NewHBoxLayout(), cardsSlice...))
-            w.SetContent(cardsPresent)
+            main.Add(cardsPresent)
             time.Sleep(time.Second * 2)
             cardsPresent.RemoveAll()
             cardsPresent.Refresh()
