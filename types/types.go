@@ -117,7 +117,7 @@ func (p *Player) DiscardCard(toDiscard int) error {
     return nil
 }
 
-func (p *Player) Play(toPlay int, main *fyne.Container) error {
+func (p *Player) Play(toPlay int, main *fyne.Container, height int, width int) error {
     if toPlay >= p.Hand.Length {
         return errors.New("number is too large")
     }
@@ -126,7 +126,7 @@ func (p *Player) Play(toPlay int, main *fyne.Container) error {
         if err != nil {
             return err
         }
-        err = c.Play(main)
+        err = c.Play(main, height, width)
         if err != nil {
             slices.Insert(p.Hand.Cards, toPlay, c)
             p.Hand.Length++
@@ -135,7 +135,7 @@ func (p *Player) Play(toPlay int, main *fyne.Container) error {
         p.Discard.NewCard(c)
         return nil
     } else {
-        err := p.Hand.Cards[toPlay].Play(main)
+        err := p.Hand.Cards[toPlay].Play(main, height, width)
         if err != nil {
             return err
         }
@@ -198,7 +198,7 @@ func (g *Group) NewCard(c Card) {
     g.Length++
 }
 
-func (c *Card) Play(main *fyne.Container) error {
+func (c *Card) Play(main *fyne.Container, height int, width int) error {
     if c.Type == "nailS" {
         if c.GroupLocation == "Player1" {
             if c.HandlerObj.Player1.NailBoost != nil {
@@ -497,6 +497,7 @@ func (c *Card) Play(main *fyne.Container) error {
                 cardsSlice = append(cardsSlice, widget.NewLabel(card.Name))
             }
             cardsPresent := container.NewCenter(container.New(layout.NewHBoxLayout(), cardsSlice...))
+            cardsPresent.Move(fyne.NewPos(float32(width/2), float32(height/2)))
             main.Add(cardsPresent)
             time.Sleep(time.Second * 2)
             cardsPresent.RemoveAll()
@@ -515,6 +516,7 @@ func (c *Card) Play(main *fyne.Container) error {
                 cardsSlice = append(cardsSlice, widget.NewLabel(card.Name))
             }
             cardsPresent := container.NewCenter(container.New(layout.NewHBoxLayout(), cardsSlice...))
+            cardsPresent.Move(fyne.NewPos(float32(width/2), float32(height/2)))
             main.Add(cardsPresent)
             time.Sleep(time.Second * 2)
             cardsPresent.RemoveAll()

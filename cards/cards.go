@@ -17,7 +17,7 @@ func NewNailSlash(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "nailS"
     c.Name = "Nail Slash"
-    c.ImagePath = "images/nail_slash.png"
+    c.ImagePath = "cards/images/nail_slash.png"
     c.Damage = 1
     c.Soul = 1
     c.FailChance = float32(0)
@@ -29,7 +29,7 @@ func NewGreatSlash(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "nailA"
     c.Name = "Great Slash"
-    c.ImagePath = "images/great_slash.png"
+    c.ImagePath = "cards/images/great_slash.png"
     c.Damage = 5
     c.FailChance = float32(0)
     c.AddsDodge = false
@@ -41,7 +41,7 @@ func NewDashSlash(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "nailA"
     c.Name = "Dash Slash"
-    c.ImagePath = "images/dash_slash.png"
+    c.ImagePath = "cards/images/dash_slash.png"
     c.Damage = 3
     c.FailChance = float32(0)
     c.AddsDodge = true
@@ -53,7 +53,7 @@ func NewCycloneSlash(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "nailA"
     c.Name = "Cyclone Slash"
-    c.ImagePath = "images/cyclone_slash.png"
+    c.ImagePath = "cards/images/cyclone_slash.png"
     c.Damage = 8
     c.FailChance = float32(0.5)
     c.AddsDodge = false
@@ -65,7 +65,7 @@ func NewVengefulSpirit(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "spell"
     c.Name = "Vengeful Spirit"
-    c.ImagePath = "images/vengeful_spirit.png"
+    c.ImagePath = "cards/images/vengeful_spirit.png"
     c.Damage = 8
     c.Soul = 2
     c.FailChance = float32(0)
@@ -78,7 +78,7 @@ func NewShadeSoul(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "spell"
     c.Name = "Shade Soul"
-    c.ImagePath = "images/shade_soul.png"
+    c.ImagePath = "cards/images/shade_soul.png"
     c.Damage = 16
     c.Soul = 4
     c.FailChance = float32(0)
@@ -91,7 +91,7 @@ func NewDesolateDive(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "spell"
     c.Name = "Desolate Dive"
-    c.ImagePath = "images/desolate_dive.png"
+    c.ImagePath = "cards/images/desolate_dive.png"
     c.Damage = 6
     c.Soul = 2
     c.FailChance = float32(0)
@@ -104,7 +104,7 @@ func NewDescendingDark(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "spell"
     c.Name = "Descending Dark"
-    c.ImagePath = "images/descending_dark.png"
+    c.ImagePath = "cards/images/descending_dark.png"
     c.Damage = 12
     c.Soul = 4
     c.FailChance = float32(0)
@@ -117,7 +117,7 @@ func NewHowlingWraiths(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "spell"
     c.Name = "Howling Wraiths"
-    c.ImagePath = "images/howling_wraiths.png"
+    c.ImagePath = "cards/images/howling_wraiths.png"
     c.Damage = 10
     c.Soul = 2
     c.FailChance = float32(0.5)
@@ -130,7 +130,7 @@ func NewAbyssShriek(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "spell"
     c.Name = "Abyss Shriek"
-    c.ImagePath = "images/abyss_shriek.png"
+    c.ImagePath = "cards/images/abyss_shriek.png"
     c.Damage = 20
     c.Soul = 4
     c.FailChance = float32(0.5)
@@ -143,7 +143,7 @@ func NewDreamNail(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "nailD"
     c.Name = "Dream Nail"
-    c.ImagePath = "images/dream_nail.png"
+    c.ImagePath = "cards/images/dream_nail.png"
     c.Soul = 2
     c.HandlerObj = h
     return *c
@@ -153,7 +153,7 @@ func NewOldNail(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "nailT"
     c.Name = "Old Nail"
-    c.ImagePath = "images/old_nail.png"
+    c.ImagePath = "cards/images/old_nail.png"
     c.NailPlus = 2
     c.TurnsLeft = 2
     c.HandlerObj = h
@@ -164,7 +164,7 @@ func NewSharpenedNail(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "nailT"
     c.Name = "Sharpened Nail"
-    c.ImagePath = "images/sharpened_nail.png"
+    c.ImagePath = "cards/images/sharpened_nail.png"
     c.NailPlus = 4
     c.TurnsLeft = 2
     c.HandlerObj = h
@@ -175,7 +175,7 @@ func NewChanneledNail(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "nailT"
     c.Name = "Channeled Nail"
-    c.ImagePath = "images/channeled_nail.png"
+    c.ImagePath = "cards/images/channeled_nail.png"
     c.NailPlus = 6
     c.TurnsLeft = 2
     c.HandlerObj = h
@@ -186,7 +186,7 @@ func NewCoiledNail(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "nailT"
     c.Name = "Coiled Nail"
-    c.ImagePath = "images/coiled_nail.png"
+    c.ImagePath = "cards/images/coiled_nail.png"
     c.NailPlus = 8
     c.TurnsLeft = 2
     c.HandlerObj = h
@@ -197,7 +197,7 @@ func NewPureNail(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "nailT"
     c.Name = "Pure Nail"
-    c.ImagePath = "images/pure_nail.png"
+    c.ImagePath = "cards/images/pure_nail.png"
     c.NailPlus = 10
     c.TurnsLeft = 2
     c.HandlerObj = h
@@ -208,7 +208,7 @@ func NewRadiantOutburst(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "infection"
     c.Name = "Radiant Outburst"
-    c.ImagePath = "images/radiant_outburst.png"
+    c.ImagePath = "cards/images/radiant_outburst.png"
     c.HandlerObj = h
     return *c
 }
@@ -217,7 +217,7 @@ func NewVoidCovering(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "void"
     c.Name = "Void Covering"
-    c.ImagePath = "images/void_covering.png"
+    c.ImagePath = "cards/images/void_covering.png"
     c.TurnsLeft = 3
     c.HandlerObj = h
     return *c
@@ -236,7 +236,7 @@ func NewShamanStone(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "charm"
     c.Name = "Shaman Stone"
-    c.ImagePath = "images/shaman_stone.png"
+    c.ImagePath = "cards/images/shaman_stone.png"
     c.Effect = ShamanStone
     c.HandlerObj = h
     return *c
@@ -260,7 +260,7 @@ func NewDoNotDream(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "precept"
     c.Name = "Do Not Dream"
-    c.ImagePath = "images/do_not_dream.png"
+    c.ImagePath = "cards/images/do_not_dream.png"
     c.Effect = DoNotDream
     c.HandlerObj = h
     return *c
@@ -280,7 +280,7 @@ func NewStrikeTheFoesWeakPoint(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "precept"
     c.Name = "Strike the Foe's Weak Point"
-    c.ImagePath = "images/strike_the_foes_weak_point.png"
+    c.ImagePath = "cards/images/strike_the_foes_weak_point.png"
     c.Effect = StrikeTheFoesWeakPoint
     c.HandlerObj = h
     return *c
@@ -300,7 +300,7 @@ func NewProtectYourOwnWeakPoint(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "precept"
     c.Name = "Protect Your Own Weak Point"
-    c.ImagePath = "images/protect_your_own_weak_point.png"
+    c.ImagePath = "cards/images/protect_your_own_weak_point.png"
     c.Effect = ProtectYourOwnWeakPoint
     c.HandlerObj = h
     return *c
@@ -328,7 +328,7 @@ func NewEatAsMuchAsYouCan(h *types.Handler) types.Card {
     c := new(types.Card)
     c.Type = "precept"
     c.Name = "Eat as Much as You Can"
-    c.ImagePath = "images/eat_as_much_as_you_can.png"
+    c.ImagePath = "cards/images/eat_as_much_as_you_can.png"
     c.Effect = EatAsMuchAsYouCan
     c.HandlerObj = h
     return *c

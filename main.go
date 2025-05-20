@@ -5,13 +5,13 @@ import (
     "fyne.io/fyne/v2/app"
     "fyne.io/fyne/v2/widget"
     "fyne.io/fyne/v2/container"
-//    "fyne.io/fyne/v2/canvas"
-    "fyne.io/fyne/v2/layout"
+    "fyne.io/fyne/v2/canvas"
+//    "fyne.io/fyne/v2/layout"
     "hk_cards/types"
     "hk_cards/cards"
     "github.com/fstanis/screenresolution"
-    "fmt"
-//    "time"
+//    "fmt"
+    "time"
 //    "math"
 //    "slices"
 )
@@ -28,7 +28,7 @@ func initDeck(i int, p int, h *types.Handler) *types.Group {
     }
     for n := 0; n < 50; n++ {
         c := new(types.Card)
-        c.Name = fmt.Sprintf("%d", n+1)
+        c.ImagePath = "cards/images/card_back.png"
         deck.NewCard(*c)
     }
     deck.NewCard(cards.NewNailSlash(h))
@@ -106,52 +106,145 @@ func initGame(i1 int, i2 int) types.Handler {
     return *game
 }
 
-func displayCards(main *fyne.Container, p int, h *types.Handler) {
+func displayCards(main *fyne.Container, p int, h *types.Handler, height int, width int) {
     if p == 1 {
-        cardsPresent := container.New(layout.NewHBoxLayout())
-        centeredCards := container.NewCenter(cardsPresent)
-        for i, card := range(h.Player1.Hand.Cards) {
-            cardsPresent.Add(widget.NewButton(card.Name, func() {PlayCardHandling(p, i, h, centeredCards, main)}))
+        cardImgs := []fyne.CanvasObject{}
+        cardBtns := []fyne.CanvasObject{}
+        cardBtnsP := []*widget.Button{}
+        for i, c := range(h.Player1.Hand.Cards) {
+            cImage := canvas.NewImageFromFile(c.ImagePath)
+            cImage.Move(fyne.NewPos(float32(width*(21-(3*i-h.Player1.Hand.Length))/40), float32(height-width*3/40)))
+            cImage.Resize(fyne.NewSize(float32(width/20), float32(3*width/40)))
+            cardImgs = append(cardImgs, cImage)
+            cButton := widget.NewButton("", func() {CardEnlarge(p, i, h, cardImgs, cardBtns, cardBtnsP, main, height, width)})
+            cButton.Move(fyne.NewPos(float32(width*(21-(3*i-h.Player1.Hand.Length))/40), float32(height-width*3/40)))
+            cButton.Resize(fyne.NewSize(float32(width/20), float32(3*width/40)))
+            cardBtns = append(cardBtns, cButton)
+            cardBtnsP = append(cardBtnsP, cButton)
+            main.Add(cButton)
+            main.Add(cImage)
         }
-        main.Add(centeredCards)
+        for i, _ := range(h.Player2.Hand.Cards) {
+            cImage := canvas.NewImageFromFile("cards/images/card_back.png")
+            cImage.Move(fyne.NewPos(float32(width*(20-(3*i-h.Player2.Hand.Length))/40), float32(0)))
+            cImage.Resize(fyne.NewSize(float32(width/20), float32(3*width/40)))
+            cardImgs = append(cardImgs, cImage)
+            main.Add(cImage)
+        }
     } else if p == 2 {
-        cardsPresent := container.New(layout.NewHBoxLayout())
-        centeredCards := container.NewCenter(cardsPresent)
-        for i, card := range(h.Player2.Hand.Cards) {
-            cardsPresent.Add(widget.NewButton(card.Name, func() {PlayCardHandling(p, i, h, centeredCards, main)}))
+        cardImgs := []fyne.CanvasObject{}
+        cardBtns := []fyne.CanvasObject{}
+        cardBtnsP := []*widget.Button{}
+        for i, c := range(h.Player2.Hand.Cards) {
+            cImage := canvas.NewImageFromFile(c.ImagePath)
+            cImage.Move(fyne.NewPos(float32(width*(21-(3*i-h.Player2.Hand.Length))/40), float32(height-width*3/40)))
+            cImage.Resize(fyne.NewSize(float32(width/20), float32(3*width/40)))
+            cardImgs = append(cardImgs, cImage)
+            cButton := widget.NewButton("", func() {CardEnlarge(p, i, h, cardImgs, cardBtns, cardBtnsP, main, height, width)})
+            cButton.Move(fyne.NewPos(float32(width*(21-(3*i-h.Player2.Hand.Length))/40), float32(height-width*3/40)))
+            cButton.Resize(fyne.NewSize(float32(width/20), float32(3*width/40)))
+            cardBtns = append(cardBtns, cButton)
+            cardBtnsP = append(cardBtnsP, cButton)
+            main.Add(cButton)
+            main.Add(cImage)
         }
-        main.Add(centeredCards)
+        for i, _ := range(h.Player1.Hand.Cards) {
+            cImage := canvas.NewImageFromFile("cards/images/card_back.png")
+            cImage.Move(fyne.NewPos(float32(width*(20-(3*i-h.Player1.Hand.Length))/40), float32(0)))
+            cImage.Resize(fyne.NewSize(float32(width/20), float32(3*width/40)))
+            cardImgs = append(cardImgs, cImage)
+            main.Add(cImage)
+        }
     }
 }
 
-func PlayCardHandling(p int, i int, h *types.Handler, c *fyne.Container, main *fyne.Container) {
+func CardEnlarge(p int, i int, h *types.Handler, CardImgs []fyne.CanvasObject, CardBtns []fyne.CanvasObject, CardBtnsP []*widget.Button, main *fyne.Container, height int, width int) {
+    for _, Btn := range(CardBtnsP) {
+        Btn.Disable()
+        Btn.Hide()
+    }
+    PosAnim := canvas.NewPositionAnimation(CardImgs[i].Position(), fyne.NewPos(float32(width/2-height/6), float32(height/4)), time.Millisecond*400, func(p fyne.Position) {
+        CardImgs[i].Move(p)
+    })
+    SizeAnim := canvas.NewSizeAnimation(CardImgs[i].Size(), fyne.NewSize(float32(height/3), float32(height/2)), time.Millisecond*400, func(s fyne.Size) {
+        CardImgs[i].Resize(s)
+    })
+    PosAnim.Start()
+    SizeAnim.Start()
+    CancelBtn := widget.NewButton("Cancel", func() {CancelPlay(p, i, h, CardImgs, CardBtns, CardBtnsP, main, height, width)})
+    CancelBtn.Move(fyne.NewPos(float32(width*17/60), float32(height*19/40)))
+    CancelBtn.Resize(fyne.NewSize(float32(width/10), float32(height/20)))
+    PlayBtn := widget.NewButton("Play", func() {PlayCardHandling(p, i, h, CardImgs, CardBtns, main, height, width)})
+    PlayBtn.Move(fyne.NewPos(float32(width*37/60), float32(height*19/40)))
+    PlayBtn.Resize(fyne.NewSize(float32(width/10), float32(height/20)))
+    CardBtns = append(CardBtns, PlayBtn, CancelBtn)
+    main.Add(PlayBtn)
+    main.Add(CancelBtn)
+}
+
+func CancelPlay(p int, i int, h *types.Handler, CardImgs []fyne.CanvasObject, CardBtns []fyne.CanvasObject, CardBtnsP []*widget.Button, main *fyne.Container, height int, width int) {
+    main.Remove(CardBtns[len(CardBtns)-1])
+    main.Remove(CardBtns[len(CardBtns)-2])
+    CardBtns = CardBtns[:len(CardBtns)-2]
     if p == 1 {
-        h.Player1.Play(i, main)
+        PosAnim := canvas.NewPositionAnimation(CardImgs[i].Position(), fyne.NewPos(float32(width*(21-(3*i-h.Player1.Hand.Length))/40), float32(height-width*3/40)), time.Millisecond*400, func(p fyne.Position) {
+            CardImgs[i].Move(p)
+        })
+        SizeAnim := canvas.NewSizeAnimation(CardImgs[i].Size(), fyne.NewSize(float32(width/20), float32(3*width/40)), time.Millisecond*400, func(s fyne.Size) {
+            CardImgs[i].Resize(s)
+        })
+        PosAnim.Start()
+        SizeAnim.Start()
+    }
+    if p == 2 {
+        PosAnim := canvas.NewPositionAnimation(CardImgs[i].Position(), fyne.NewPos(float32(width*(21-(3*i-h.Player2.Hand.Length))/40), float32(height-width*3/40)), time.Millisecond*400, func(p fyne.Position) {
+            CardImgs[i].Move(p)
+        })
+        SizeAnim := canvas.NewSizeAnimation(CardImgs[i].Size(), fyne.NewSize(float32(width/20), float32(3*width/40)), time.Millisecond*400, func(s fyne.Size) {
+            CardImgs[i].Resize(s)
+        })
+        PosAnim.Start()
+        SizeAnim.Start()
+    }
+    for _, Btn := range(CardBtnsP) {
+        Btn.Enable()
+        Btn.Show()
+    }
+}
+
+func PlayCardHandling(p int, i int, h *types.Handler, CardImgs []fyne.CanvasObject, CardBtns []fyne.CanvasObject, main *fyne.Container, height int, width int) {
+    if p == 1 {
+        h.Player1.Play(i, main, height, width)
         p = 2
     } else if p == 2 {
-        h.Player2.Play(i, main)
+        h.Player2.Play(i, main, height, width)
         p = 1
     }
-    c.RemoveAll()
-    status := Turn(main, p, h)
-    if status == 0 {
+    for _, c := range(CardImgs) {
+        main.Remove(c)
+    }
+    for _, c := range(CardBtns) {
+        main.Remove(c)
+    }
+    status := Turn(main, p, h, height, width)
+    if status != 0 {
     }
 }
 
-func StartGame(main *fyne.Container, p int, h *types.Handler, start *widget.Button) {
+func StartGame(main *fyne.Container, p int, h *types.Handler, start *widget.Button, height int, width int) {
     main.Remove(start)
     main.Refresh()
-    Turn(main, p, h)
+    Turn(main, p, h, height, width)
 }
 
-func Turn(main *fyne.Container, p int, h *types.Handler) int {
+func Turn(main *fyne.Container, p int, h *types.Handler, height int, width int) int {
     if p == 1 {
         h.Player1.DrawHand()
     }
     if p == 2 {
         h.Player2.DrawHand()
     }
-    displayCards(main, p, h)
+    displayCards(main, p, h, height, width)
     if (h.Player2.Deck.Length == 0 && h.Player2.Hand.Length == 0) || h.Player2.Health <= 0 {
         return 1
     }
@@ -175,7 +268,7 @@ func main() {
     w.SetFullScreen(true)
     w.SetFixedSize(true)
     StartButton := widget.NewButton("Start Game", func() {a = a})
-    StartButton.OnTapped = func() {StartGame(AllContent, 1, &game, StartButton)}
+    StartButton.OnTapped = func() {StartGame(AllContent, 1, &game, StartButton, w_height, w_width)}
     StartButton.Resize(fyne.NewSize(150, 50))
     StartButton.Move(fyne.NewPos(float32(w_width/2), float32(w_height/2)))
     CloseButton := widget.NewButton("Close", func() {WinClose(w)})
