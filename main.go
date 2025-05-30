@@ -27,9 +27,7 @@ func initDeck(i int, p int, h *types.Handler) *types.Group {
         deck.Location = "Player2"
     }
     for n := 0; n < 50; n++ {
-        c := new(types.Card)
-        c.ImagePath = "cards/images/card_back.png"
-        deck.NewCard(*c)
+        deck.NewCard(cards.NewNailSlash(h))
     }
     deck.NewCard(cards.NewNailSlash(h))
     deck.NewCard(cards.NewDreamNail(h))
@@ -206,10 +204,13 @@ func CancelPlay(p int, i int, h *types.Handler, CardImgs []fyne.CanvasObject, Ca
         PosAnim.Start()
         SizeAnim.Start()
     }
-    for _, Btn := range(CardBtnsP) {
-        Btn.Enable()
-        Btn.Show()
-    }
+    go func() {
+        time.Sleep(time.Millisecond*400)
+        for _, Btn := range(CardBtnsP) {
+            Btn.Enable()
+            Btn.Show()
+        }
+    }()
 }
 
 func PlayCardHandling(p int, i int, h *types.Handler, CardImgs []fyne.CanvasObject, CardBtns []fyne.CanvasObject, main *fyne.Container, height int, width int) {
@@ -270,10 +271,10 @@ func main() {
     StartButton := widget.NewButton("Start Game", func() {a = a})
     StartButton.OnTapped = func() {StartGame(AllContent, 1, &game, StartButton, w_height, w_width)}
     StartButton.Resize(fyne.NewSize(150, 50))
-    StartButton.Move(fyne.NewPos(float32(w_width/2), float32(w_height/2)))
+    StartButton.Move(fyne.NewPos(float32(w_width/2-75), float32(w_height/2-25)))
     CloseButton := widget.NewButton("Close", func() {WinClose(w)})
     CloseButton.Resize(fyne.NewSize(150, 50))
-    CloseButton.Move(fyne.NewPos(300, 100))
+    CloseButton.Move(fyne.NewPos(0, 0))
     AllContent.Add(StartButton)
     AllContent.Add(CloseButton)
     w.SetContent(AllContent)
